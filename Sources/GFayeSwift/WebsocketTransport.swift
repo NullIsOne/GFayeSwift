@@ -80,10 +80,8 @@ internal class WebsocketTransport: Transport, WebSocketDelegate, WebSocketPongDe
         self.delegate?.didReceiveMessage(text)
     }
 
-    // MARK: TODO
     internal func websocketDidReceiveData(socket: WebSocketClient, data: Data) {
         print("Faye: Received data: \(data.count)")
-        //self.socket.writeData(data)
     }
 
     // MARK: WebSocket Pong Delegate

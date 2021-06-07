@@ -13,20 +13,18 @@ import SwiftyJSON
 
 extension GFayeClient {
 
-    // MARK: 
     // MARK: Parsing
 
     fileprivate func parseHandshakeMessage(_ messageDict: JSON) {
         self.gFayeClientId = messageDict[Bayeux.clientId.rawValue].stringValue
-        if messageDict[Bayeux.successful.rawValue].int == 1 {
-            self.delegate?.connectedToServer(self)
-            self.gFayeConnected = true
-            self.connect()
-            self.subscribeQueuedSubscriptions()
-            _ = pendingSubscriptionSchedule.isValid
-        } else {
-            // OOPS
+        guard messageDict[Bayeux.successful.rawValue].int == 1 else {
+            return
         }
+        self.delegate?.connectedToServer(self)
+        self.gFayeConnected = true
+        self.connect()
+        self.subscribeQueuedSubscriptions()
+        _ = pendingSubscriptionSchedule.isValid
     }
 
     fileprivate func parseConnectMessage(_ messageDict: JSON) {
@@ -34,18 +32,18 @@ extension GFayeClient {
             self.gFayeConnected = true
             self.connect()
         } else {
-            // OOPS
+            self.gFayeConnected = false
+            self.delegate?.connectionFailed(self)
         }
     }
 
     fileprivate func parseDisconnectMessage(_ messageDict: JSON) {
-        if messageDict[Bayeux.successful.rawValue].int == 1 {
-            self.gFayeConnected = false
-            self.transport?.closeConnection()
-            self.delegate?.disconnectedFromServer(self)
-        } else {
-            // OOPS
+        guard messageDict[Bayeux.successful.rawValue].int == 1 else {
+            return
         }
+        self.gFayeConnected = false
+        self.transport?.closeConnection()
+        self.delegate?.disconnectedFromServer(self)
     }
 
     fileprivate func parseSubscribeMessage(_ messageDict: JSON) {
@@ -122,11 +120,17 @@ extension GFayeClient {
                 } else {
                     print("Faye: Message \(successful ? "successfully" : "failed to") sent to channel \(channel)")
                 }
+                let error = messageDict[Bayeux.error.rawValue].stringValue
+                if !successful, !error.isEmpty {
+                    self.delegate?.errorReceived(self, error: error)
+                }
             } else {
                 print("Faye: For some reason data is nil for channel: \(channel)")
+                self.delegate?.errorReceived(self, error: "404::Empty mesage")
             }
         } else {
             print("Faye: Weird channel that not been set to subscribed: \(channel)")
+            self.delegate?.errorReceived(self, error: "403::Weird channel to subscribe")
         }
     }
 

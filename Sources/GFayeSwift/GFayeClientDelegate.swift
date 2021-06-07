@@ -19,6 +19,7 @@ public typealias GFayeMessage = [String: Any]
 // MARK: GFayeClientDelegate Protocol
 public protocol GFayeClientDelegate: AnyObject {
     func messageReceived(_ client: GFayeClient, messageDict: GFayeMessage, channel: String)
+    func errorReceived(_ client: GFayeClient, error: String)
     func pongReceived(_ client: GFayeClient)
     func connectedToServer(_ client: GFayeClient)
     func disconnectedFromServer(_ client: GFayeClient)
@@ -31,6 +32,7 @@ public protocol GFayeClientDelegate: AnyObject {
 
 public extension GFayeClientDelegate {
     func messageReceived(_ client: GFayeClient, messageDict: GFayeMessage, channel: String) {}
+    func errorReceived(_ client: GFayeClient, error: String) {}
     func pongReceived(_ client: GFayeClient) {}
     func connectedToServer(_ client: GFayeClient) {}
     func disconnectedFromServer(_ client: GFayeClient) {}

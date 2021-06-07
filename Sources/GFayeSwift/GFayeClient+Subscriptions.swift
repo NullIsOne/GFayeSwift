@@ -58,7 +58,7 @@ extension GFayeClient {
                     let json = try JSON(data: jsonData)
                     self.parseFayeMessage(json)
                 } catch {
-                    // TODO
+                    self.delegate?.fayeClientError(self, error: error)
                 }
             }
         }
